@@ -1,0 +1,183 @@
+/**
+ * Copyright (c) 2010-2018 by the respective copyright holders.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.openhab.binding.velux.handler;
+
+import static org.openhab.binding.velux.VeluxBindingConstants.*;
+
+import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
+import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.velux.bridge.VeluxBridgeDetectProducts;
+import org.openhab.binding.velux.bridge.VeluxBridgeDeviceStatus;
+import org.openhab.binding.velux.bridge.VeluxBridgeLANConfig;
+import org.openhab.binding.velux.bridge.VeluxBridgeWLANConfig;
+import org.openhab.binding.velux.internal.config.VeluxBridgeConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * The {@link VeluxBridgeHandler} is responsible for handling of the communication,
+ * which is sent via the veluxBridge to support the different channels.
+ * <P>
+ * Besides the usual {@link BaseBridgeHandler} methods, it provides three methods
+ * for interaction,
+ * <UL>
+ * <LI>{@link VeluxBridgeHandler#bridgeLogin} for initiation of an authentication,
+ * <LI>{@link VeluxBridgeHandler#bridgeLogout} for closing of an authentication, and
+ * <LI>{@link VeluxBridgeHandler#bridgeCommunicate} for communication in between.
+ * </UL>
+ * Beside the method parameters, the behavior is controlled by {@link VeluxBridgeConfiguration}.
+ *
+ * @author Guenther Schreiner - Initial contribution
+ */
+public class VeluxBridgeHandler extends BaseBridgeHandler {
+    private final Logger logger = LoggerFactory.getLogger(VeluxBridgeHandler.class);
+
+    @Override
+    public void handleCommand(ChannelUID channelUID, Command command) {
+        logger.trace("handleCommand({},{}) called.", channelUID.getAsString(), command);
+
+        String channelId = channelUID.getId();
+
+        if (command instanceof RefreshType) {
+            switch (channelId) {
+                case CHANNEL_BRIDGE_STATUS:
+                    String deviceStatus = new VeluxBridgeDeviceStatus().retrieve(this);
+                    logger.trace("handleCommand() updating {} to {}.", channelUID, deviceStatus);
+                    updateState(channelUID, new StringType(deviceStatus));
+                    break;
+
+                case CHANNEL_BRIDGE_FIRMWARE:
+                    if (this.firmware == null) {
+                        this.firmware = new VeluxBridgeFirmware().retrieve(this);
+                    }
+                    if (this.firmware != null && this.firmware.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.firmware.firmwareVersion);
+                        updateState(channelUID, new StringType(this.firmware.firmwareVersion));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+
+                case CHANNEL_BRIDGE_IPADDRESS:
+                    if (this.lanConfig == null) {
+                        this.lanConfig = new VeluxBridgeLANConfig().retrieve(this);
+                    }
+                    if (this.lanConfig != null && this.lanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.lanConfig.ipAddress);
+                        updateState(channelUID, new StringType(this.lanConfig.ipAddress));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+                case CHANNEL_BRIDGE_SUBNETMASK:
+                    if (this.lanConfig == null) {
+                        this.lanConfig = new VeluxBridgeLANConfig().retrieve(this);
+                    }
+                    if (this.lanConfig != null && this.lanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.lanConfig.subnetMask);
+                        updateState(channelUID, new StringType(this.lanConfig.subnetMask));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+
+                case CHANNEL_BRIDGE_DEFAULTGW:
+                    if (this.lanConfig == null) {
+                        this.lanConfig = new VeluxBridgeLANConfig().retrieve(this);
+                    }
+                    if (this.lanConfig != null && this.lanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.lanConfig.defaultGW);
+                        updateState(channelUID, new StringType(this.lanConfig.defaultGW));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+                case CHANNEL_BRIDGE_DHCP:
+                    if (this.lanConfig == null) {
+                        this.lanConfig = new VeluxBridgeLANConfig().retrieve(this);
+                    }
+                    if (this.lanConfig != null && this.lanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.lanConfig.enabledDHCP);
+                        updateState(channelUID, this.lanConfig.enabledDHCP ? OnOffType.ON : OnOffType.OFF);
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+
+                case CHANNEL_BRIDGE_WLANSSID:
+                    if (this.wlanConfig == null) {
+                        this.wlanConfig = new VeluxBridgeWLANConfig().retrieve(this);
+                    }
+                    if (this.wlanConfig != null && this.wlanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.wlanConfig.wlanSSID);
+                        updateState(channelUID, new StringType(this.wlanConfig.wlanSSID));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+                case CHANNEL_BRIDGE_WLANPASSWORD:
+                    if (this.wlanConfig == null) {
+                        this.wlanConfig = new VeluxBridgeWLANConfig().retrieve(this);
+                    }
+                    if (this.wlanConfig != null && this.wlanConfig.isRetrieved) {
+                        logger.trace("handleCommand() updating {} to {}.", channelUID, this.wlanConfig.wlanPassword);
+                        updateState(channelUID, new StringType(this.wlanConfig.wlanPassword));
+                    } else {
+                        logger.trace("handleCommand() updating of {} failed.", channelUID);
+                    }
+                    break;
+
+                case CHANNEL_BRIDGE_SCENES:
+                    String sceneInfo = this.existingsScenes.toString();
+                    logger.info("handleCommand() found scenes {}.", sceneInfo);
+                    sceneInfo = sceneInfo.replaceAll("[^\\p{Punct}\\w]", "_");
+                    logger.trace("handleCommand() updating {} to {}.", channelUID, sceneInfo);
+                    updateState(channelUID, new StringType(sceneInfo));
+                    break;
+
+                case CHANNEL_BRIDGE_PRODUCTS:
+                    if (this.existingsProducts.getNoMembers() == 0) {
+                        logger.trace("handleCommand() is about to fetch existing products.");
+                        new VeluxBridgeGetProducts().getProducts(this);
+                    }
+                    String productInfo = this.existingsProducts.toString();
+                    logger.info("handleCommand() found products {}.", productInfo);
+                    productInfo = productInfo.replaceAll("[^\\p{Punct}\\w]", "_");
+                    logger.trace("handleCommand() updating {} to {}.", channelUID, productInfo);
+                    updateState(channelUID, new StringType(productInfo));
+                    break;
+
+                default:
+                    logger.trace("handleCommand() cannot handle REFRESH on channel {}.", channelId);
+            }
+        } else if (command instanceof OnOffType)
+
+        {
+            switch (channelId) {
+                case CHANNEL_BRIDGE_DO_DETECTION:
+                    if (command.equals(OnOffType.ON)) {
+                        logger.trace("handleCommand() about to activate veluxBridge detection mode.");
+                        new VeluxBridgeDetectProducts().detectProducts(this);
+                    } else {
+                        logger.trace("handleCommand() ignoring OFF command.");
+                    }
+                    break;
+                default:
+                    logger.trace("handleCommand() cannot handle ON/OFF on channel {}.", channelId);
+            }
+        } else {
+            logger.debug("Bridge command {} not supported.", command);
+        }
+    }
+
+}

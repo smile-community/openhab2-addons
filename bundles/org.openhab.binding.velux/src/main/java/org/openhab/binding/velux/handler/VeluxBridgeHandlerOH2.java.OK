@@ -1,0 +1,117 @@
+/**
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.binding.velux.handler;
+
+import org.eclipse.smarthome.core.thing.Bridge;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
+import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.velux.bridge.VeluxBridgeInstance;
+import org.openhab.binding.velux.bridge.VeluxBridgeProvider;
+import org.openhab.binding.velux.bridge.common.BridgeAPI;
+import org.openhab.binding.velux.bridge.common.BridgeCommunicationProtocol;
+import org.openhab.binding.velux.internal.config.VeluxBridgeConfiguration;
+import org.openhab.binding.velux.things.VeluxExistingProducts;
+import org.openhab.binding.velux.things.VeluxExistingScenes;
+
+/**
+ * <B>Common interaction with the </B><I>Velux</I><B> bridge.</B>
+ * <P>
+ * It implements the communication between <B>OpenHAB</B> and the <I>Velux</I> Bridge:
+ * <UL>
+ * <LI><B>OpenHAB</B> Event Bus &rarr; <I>Velux</I> <B>bridge</B>
+ * <P>
+ * Sending commands and value updates.</LI>
+ * <LI><I>Velux</I> <B>bridge</B> &rarr; <B>OpenHAB</B>:
+ * <P>
+ * Retrieving information by sending a Refresh command.</LI>
+ * </UL>
+ * <P>
+ * Entry point for this class is the method
+ * {@link org.openhab.binding.velux.handler.VeluxBridgeHandlerOH2#handleCommandOnChannel handleCommandOnChannel}.
+ * <P>
+ * <B>Note:</B> This is the same functionality as provided by the <I>OpenHAB2</I>-specific classes
+ * org.openhab.binding.velux.handler.VeluxBridgeHandler and
+ * org.openhab.binding.velux.handler.VeluxHandler}.
+ *
+ * @author Guenther Schreiner - Initial contribution.
+ * @since 1.13.0
+ */
+// public class VeluxBridgeHandlerOH2 extends VeluxBridge implements VeluxBridgeInstance, VeluxBridgeProvider {
+public class VeluxBridgeHandlerOH2 extends BaseBridgeHandler implements VeluxBridgeInstance, VeluxBridgeProvider {
+
+    /**
+     * Information retrieved by {@link org.openhab.binding.velux.bridge.VeluxBridgeActuators#getProducts}
+     */
+    @Override
+    public VeluxExistingProducts existingProducts() {
+        return null;
+    };
+
+    /**
+     * Information retrieved by {@link org.openhab.binding.velux.bridge.VeluxBridgeScenes#getScenes}
+     */
+    @Override
+    public VeluxExistingScenes existingScenes() {
+        return null;
+    }
+
+    /*
+     * Constructor.
+     */
+
+    public VeluxBridgeHandlerOH2() {
+        super(null);
+    }
+
+    public VeluxBridgeHandlerOH2(Bridge bridge) {
+        super(bridge);
+
+    }
+
+    /**
+     * General two-way communication method.
+     *
+     * It provides either information retrieval or information update according to the passed command.
+     *
+     * @param itemName The item passed as type {@link String} for which to following command is addressed to.
+     * @param command The command passed as type {@link Command} for the mentioned item. If
+     *            {@code command} is {@code null}, an information retrieval via a <B>Refresh</B> command
+     *            is initiated for this item.
+     * @param config The item-specific configuration information passed as type {@link VeluxBindingProvider}.
+     * @param provider The bridge-specific provides information passed as type {@link VeluxBindingConfig}.
+     * @param eventPublisher The connectivity to the OpenHAB event bus passed as type {@link EventPublisher}.
+     */
+    @Override
+    public void handleCommand(ChannelUID channelUID, Command command) {
+    }
+
+    @Override
+    public boolean bridgeCommunicate(BridgeCommunicationProtocol communication) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public BridgeAPI bridgeAPI() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public VeluxBridgeConfiguration veluxBridgeConfiguration() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+}
